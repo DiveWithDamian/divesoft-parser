@@ -27,7 +27,8 @@ import logging
 from typing import Union
 
 from divesoft_parser.models.enums import ConfigurationType, DiveRecordType
-from divesoft_parser.utilities import BitArray
+from divesoft_parser.models.records.configuration import ConfigurationVersionRecord
+from divesoft_parser.utilities import BitArray, ByteConverter
 
 logger: logging.Logger = logging.getLogger(__name__)
 
@@ -42,7 +43,8 @@ class ConfigurationRecordParser:
         if len(self.record_data) < 12:
             raise AssertionError(f"Truncated configuration record ({self.record_data.hex()})")
 
-    def decode(self) -> Union[None]:
+    def decode(self) -> Union[None,
+                              ConfigurationVersionRecord]:
         try:
             configuration_type = ConfigurationType(self.bit_array.get_int(21, 31))
         except ValueError:
@@ -61,10 +63,20 @@ class ConfigurationRecordParser:
         else:
             logger.error(f'Unknown configuration type: {configuration_type}')
 
-    def _decode_version(self) -> None:
-        # TODO: figure out how this value is encoded
-        logger.warning(f'Skipping decoding of configuration version ({self.record_data.hex()})')
-        return None
+    def _decode_version(self) -> ConfigurationVersionRecord:
+        return ConfigurationVersionRecord(
+            when=self.bit_array.get_int(4, 21),
+            record_type=self.record_type,
+            configuration_type=ConfigurationType.Version,
+            device=ByteConverter.to_uint8(self.record_data[0:1]),
+            hardware_major=ByteConverter.to_uint8(self.record_data[1:2]),
+            hardware_minor=ByteConverter.to_uint8(self.record_data[2:3]),
+            software_major=ByteConverter.to_uint8(self.record_data[3:4]),
+            software_minor=ByteConverter.to_uint8(self.record_data[4:5]),
+            software_patch=ByteConverter.to_uint8(self.record_data[5:6]),
+            software_flags=ByteConverter.to_uint16(self.record_data[6:8]),
+            software_build=ByteConverter.to_int16(self.record_data[8:10]),
+        )
 
     def _decode_serial_number(self) -> None:
         # TODO: figure out how this value is encoded

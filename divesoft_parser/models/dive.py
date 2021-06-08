@@ -28,6 +28,7 @@ from datetime import datetime
 from typing import List, Union
 
 from divesoft_parser.models.enums import DiveMode
+from divesoft_parser.models.records.configuration import ConfigurationVersionRecord
 from divesoft_parser.models.records.event import (EventChangeModeRecord,
                                                   EventCnsRecord,
                                                   EventKeyRecord,
@@ -59,5 +60,6 @@ class Dive:
                         EventStartRecord,
                         EventUserMarkRecord,
                         EventOccurrenceRecord,
-                        MeasurementBatteryRecord]]
+                        MeasurementBatteryRecord,
+                        ConfigurationVersionRecord]]
     points: List[PointRecord]
