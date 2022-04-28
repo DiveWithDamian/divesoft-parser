@@ -27,7 +27,8 @@ import logging
 from datetime import datetime
 from io import BytesIO
 
-from ..models.dive import DiveMode, Dive
+from ..models.dive import Dive
+from ..models.enums import DiveMode
 from ..utilities import ByteConverter, BitArray
 
 logger: logging.Logger = logging.getLogger(__name__)
@@ -37,13 +38,13 @@ class DLFHeader:
     def __init__(self, bytes: BytesIO) -> None:
         raw_bytes = bytes.read(32)
         if len(raw_bytes) < 32:
-            raise AssertionError(f"Truncated header ({raw_bytes.hex()})")
+            raise AssertionError(f"Truncated header ({raw_bytes.hex()!r})")
         self.bytes = BytesIO(raw_bytes)
 
     def decode(self) -> Dive:
         header_marker = self.bytes.read(4)
         if header_marker != b"DivE":
-            raise AssertionError(f"Header missing marker ({header_marker})")
+            raise AssertionError(f"Header missing marker ({header_marker!r})")
         self.bytes.read(2)  # ?
         log_number = ByteConverter.to_uint16(self.bytes.read(2))
         start_time = datetime.utcfromtimestamp(

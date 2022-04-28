@@ -26,10 +26,11 @@ SOFTWARE.
 import logging
 from typing import Optional, Union
 
-from divesoft_parser.models.dive import DiveMode
-from divesoft_parser.models.enums import DiveStartReason, DiveRecordType
-from divesoft_parser.models.records.event import (EventRecordType,
-                                                  EventMixChangeRecord,
+from divesoft_parser.models.enums import (DiveMode,
+                                          DiveStartReason,
+                                          DiveRecordType,
+                                          EventRecordType)
+from divesoft_parser.models.records.event import (EventMixChangeRecord,
                                                   EventStartRecord,
                                                   EventChangeModeRecord,
                                                   EventKeyRecord,
@@ -63,7 +64,7 @@ class EventRecordParser:
             event_type = EventRecordType(ByteConverter.to_uint16(self.record_data[0:2]))
         except ValueError:
             logger.warning(f'Skipping decoding of event record ({self.record_data.hex()})')
-            return
+            return None
 
         if event_type == EventRecordType.Mix_Changed:
             return self._decode_event_mix_changed()
@@ -94,13 +95,14 @@ class EventRecordParser:
 
         else:
             logger.error(f"Unknown event type: {event_type}")
+            return None
 
     def _decode_event_mode_change(self) -> Optional[EventChangeModeRecord]:
         try:
             dive_mode = DiveMode(ByteConverter.to_uint8(self.record_data[4:5]))
         except ValueError as e:
             logger.error(f"Unknown dive mode: {e}")
-            return
+            return None
 
         return EventChangeModeRecord(
             when=self.bit_array.get_int(4, 21),
@@ -143,7 +145,7 @@ class EventRecordParser:
             reason = DiveStartReason(ByteConverter.to_uint8(self.record_data[1:2]))
         except ValueError as e:
             logger.error(f"Unknown start reason {e}")
-            return
+            return None
 
         return EventStartRecord(
             when=self.bit_array.get_int(4, 21),

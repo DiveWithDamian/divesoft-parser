@@ -30,7 +30,6 @@ from divesoft_parser.decoders.records.configuration import ConfigurationRecordPa
 from divesoft_parser.decoders.records.event import EventRecordParser
 from divesoft_parser.decoders.records.measurement import MeasurementRecordParser
 from divesoft_parser.decoders.records.point import PointRecordParser
-from divesoft_parser.decoders.records.status import StatusRecordParser
 from divesoft_parser.models.dive import Dive
 from divesoft_parser.models.enums import DiveRecordType
 from divesoft_parser.utilities import BitArray
@@ -55,19 +54,13 @@ class DLFRecord:
             return None
 
         if record_type == DiveRecordType.Point:
-            point = PointRecordParser(record_type, bit_array, self.bytes.read()).decode()
-            if point:
+            if point := PointRecordParser(record_type, bit_array, self.bytes.read()).decode():
                 dive.points.append(point)
 
         elif record_type == DiveRecordType.Measurement:
-            record = MeasurementRecordParser(record_type, bit_array, self.bytes.read()).decode()
-            if record:
-                dive.records.append(record)
-
-        elif record_type == DiveRecordType.Status:
-            record = StatusRecordParser(record_type, bit_array, self.bytes.read()).decode()
-            if record:
-                dive.records.append(record)
+            if measurement := MeasurementRecordParser(record_type, bit_array,
+                                                      self.bytes.read()).decode():
+                dive.records.append(measurement)
 
         elif record_type in [
             DiveRecordType.Manipulation,
@@ -75,14 +68,13 @@ class DLFRecord:
             DiveRecordType.Diver_Error,
             DiveRecordType.Internal_Error,
         ]:
-            record = EventRecordParser(record_type, bit_array, self.bytes.read()).decode()
-            if record:
-                dive.records.append(record)
+            if event := EventRecordParser(record_type, bit_array, self.bytes.read()).decode():
+                dive.records.append(event)
 
         elif record_type == DiveRecordType.Configuration:
-            record = ConfigurationRecordParser(record_type, bit_array, self.bytes.read()).decode()
-            if record:
-                dive.records.append(record)
+            if configuration := ConfigurationRecordParser(record_type, bit_array,
+                                                          self.bytes.read()).decode():
+                dive.records.append(configuration)
 
         else:
             logger.error(f'Unknown record type: {record_type}')

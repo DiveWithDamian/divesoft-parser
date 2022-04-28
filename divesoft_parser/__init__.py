@@ -26,4 +26,4 @@ SOFTWARE.
 from .decoder import DLFDecoder
 
 __version__ = "0.0.1"
-__all__ = [DLFDecoder]
+__all__ = ['DLFDecoder']

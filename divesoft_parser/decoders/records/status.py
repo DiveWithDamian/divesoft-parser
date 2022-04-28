@@ -24,7 +24,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 """
 import logging
-from typing import Optional
 
 from divesoft_parser.models.enums import StatusType, DiveRecordType
 from divesoft_parser.utilities import BitArray
@@ -42,7 +41,7 @@ class StatusRecordParser:
         if len(self.record_data) < 12:
             raise AssertionError(f"Truncated status record ({self.record_data.hex()})")
 
-    def decode(self) -> Optional[None]:
+    def decode(self) -> None:
         try:
             status_type = StatusType(self.bit_array.get_int(21, 31))
         except ValueError:

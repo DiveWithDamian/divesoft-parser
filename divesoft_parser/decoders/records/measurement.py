@@ -48,12 +48,13 @@ class MeasurementRecordParser:
             measurement_type = MeasurementType(self.bit_array.get_int(21, 31))
         except ValueError:
             logger.warning(f'Skipping decoding of measurement record ({self.record_data.hex()})')
-            return None
-
-        if measurement_type == MeasurementType.Battery:
-            return self._decode_battery_measurement()
         else:
-            logger.error(f'Unknown measurement type: {measurement_type}')
+            if measurement_type == MeasurementType.Battery:
+                return self._decode_battery_measurement()
+            else:
+                logger.error(f'Unknown measurement type: {measurement_type}')
+
+        return None
 
     def _decode_battery_measurement(self) -> Optional[MeasurementBatteryRecord]:
         volt, percentage, status = None, None, None
@@ -64,7 +65,7 @@ class MeasurementRecordParser:
                 status = BatteryStats(ByteConverter.to_uint8(self.record_data[3:4]))
             except ValueError as e:
                 logger.warning(f"Unknown battery status {e}")
-                return
+                return None
 
         return MeasurementBatteryRecord(
             when=self.bit_array.get_int(4, 21),

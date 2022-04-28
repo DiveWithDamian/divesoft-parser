@@ -54,14 +54,9 @@ class ConfigurationRecordParser:
         if configuration_type == ConfigurationType.Version:
             return self._decode_version()
 
-        elif configuration_type == ConfigurationType.Serial_Number:
-            return self._decode_serial_number()
-
-        elif configuration_type == ConfigurationType.Deco_Configuration:
-            return self._decode_configuration()
-
         else:
             logger.error(f'Unknown configuration type: {configuration_type}')
+            return None
 
     def _decode_version(self) -> ConfigurationVersionRecord:
         return ConfigurationVersionRecord(
@@ -77,13 +72,3 @@ class ConfigurationRecordParser:
             software_flags=ByteConverter.to_uint16(self.record_data[6:8]),
             software_build=ByteConverter.to_int16(self.record_data[8:10]),
         )
-
-    def _decode_serial_number(self) -> None:
-        # TODO: figure out how this value is encoded
-        logger.warning(f'Skipping decoding of serial number ({self.record_data.hex()})')
-        return None
-
-    def _decode_configuration(self) -> None:
-        # TODO: figure out how this value is encoded
-        logger.warning(f'Skipping decoding of configuration ({self.record_data.hex()})')
-        return None

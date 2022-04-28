@@ -28,7 +28,7 @@ import datetime
 import json
 import logging
 from enum import Enum
-from typing import Optional, List
+from typing import Optional, List, Any
 
 from divesoft_parser.models.dive import Dive
 
@@ -40,42 +40,42 @@ class ByteConverter:
     def to_int8(data: bytes) -> int:
         """Convert 1 byte into an un-signed 8bit integer."""
         if len(data) != 1:
-            raise ValueError(f"to_int8 requires one bytes ({data})")
+            raise ValueError(f"to_int8 requires one bytes ({data!r})")
         return data[0]
 
     @staticmethod
     def to_bool(data: bytes) -> bool:
         """Convert 1 byte into a bool."""
         if len(data) != 1:
-            raise ValueError(f"to_bool requires one bytes ({data})")
+            raise ValueError(f"to_bool requires one bytes ({data!r})")
         return bool(data[0])
 
     @staticmethod
     def to_uint8(data: bytes) -> int:
         """Convert 1 byte into a signed 8bit integer."""
         if len(data) != 1:
-            raise ValueError(f"to_uint8 requires one bytes ({data})")
+            raise ValueError(f"to_uint8 requires one bytes ({data!r})")
         return data[0] & 255
 
     @staticmethod
     def to_int16(data: bytes) -> int:
         """Convert 2 bytes into a signed 16bit integer."""
         if len(data) != 2:
-            raise ValueError(f"to_int16 requires two bytes ({data})")
+            raise ValueError(f"to_int16 requires two bytes ({data!r})")
         return (data[1] << 8) | (data[0] & 255)
 
     @staticmethod
     def to_uint16(data: bytes) -> int:
         """Convert 2 bytes into an un-signed 16bit integer."""
         if len(data) != 2:
-            raise ValueError(f"to_uint16 requires two bytes ({data})")
+            raise ValueError(f"to_uint16 requires two bytes ({data!r})")
         return ((data[1] & 255) << 8) | (data[0] & 255)
 
     @staticmethod
     def to_int32(data: bytes) -> int:
         """Convert 4 bytes into a signed 32bit integer."""
         if len(data) != 4:
-            raise ValueError(f"to_int32 requires four bytes ({data})")
+            raise ValueError(f"to_int32 requires four bytes ({data!r})")
         return (data[3] << 24 |
                 (data[2] & 255) << 16 |
                 (data[1] & 255) << 8 |
@@ -85,7 +85,7 @@ class ByteConverter:
     def to_uint32(data: bytes) -> int:
         """Convert 4 bytes into an un-signed 32bit integer."""
         if len(data) != 4:
-            raise ValueError(f"to_uint32 requires four bytes ({data})")
+            raise ValueError(f"to_uint32 requires four bytes ({data!r})")
         return ((data[3] & 255) << 24 |
                 (data[2] & 255) << 16 |
                 (data[1] & 255) << 8 |
@@ -126,8 +126,7 @@ class BitArray:
 class ExtendedDiveEncoder(json.JSONEncoder):
     """Helper encoder for internal types."""
 
-    # pyre-ignore
-    def default(self, o):
+    def default(self, o: Any) -> Any:
         if dataclasses.is_dataclass(o):
             return dataclasses.asdict(o)
         if isinstance(o, (datetime.datetime,)):
